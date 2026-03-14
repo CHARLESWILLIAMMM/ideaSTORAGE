@@ -1,0 +1,54 @@
+# ──────────────────────────────────────────────────────────
+# AI Workflow Vault — GitHub Pages deployment
+#
+# Publishes the static site to GitHub Pages on every push
+# to the default branch, or on manual dispatch.
+# Live URL: https://CHARLESWILLIAMMM.github.io/ideaSTORAGE/
+# ──────────────────────────────────────────────────────────
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      # Keep deploying from this feature branch until it is merged into main
+      - copilot/add-magic-input-area
+  workflow_dispatch:                    # allow manual trigger from Actions tab
+
+# Grant only the permissions needed for Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; cancel any in-progress run
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy static site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Upload the entire repo root as the Pages artifact.
+      # The .github folder is excluded automatically by the uploader.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
